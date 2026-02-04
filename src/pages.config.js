@@ -1,6 +1,6 @@
 import Home from './pages/Home.jsx';
 import Booking from './pages/Booking.jsx';
-import BookingSuccess from './pages/BookingSuccess';
+import BookingSuccess from './pages/BookingSuccess.jsx';
 import MyAppointments from './pages/MyAppointments.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import AdminServices from './pages/AdminServices.jsx';
