@@ -56,4 +56,13 @@ public class ServiceController {
         serviceService.deleteService(id);
         return ResponseEntity.noContent().build();
     }
+
+    // 🔒 Obtener TODOS los servicios (incluyendo inactivos) - Solo ADMIN
+    @PreAuthorize("@barbershopSecurity.canAccessBarbershop(authentication, #barbershopId)")
+    @GetMapping("/all")
+    public ResponseEntity<List<ServiceResponse>> getAllByBarbershop(
+        @RequestParam Long barbershopId) {
+        return ResponseEntity.ok(serviceService.getAllServicesByBarbershop(barbershopId));
+    }
+
 }

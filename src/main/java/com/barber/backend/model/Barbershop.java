@@ -22,12 +22,22 @@ public class Barbershop {
     private String phone;
     
     @Column(nullable = false, unique = true)
-    private String slug; // Para URLs: /barberia/elite-cuts
+    private String slug;
     
     @Column(length = 500)
     private String description;
     
     private Boolean active = true;
+    
+    // Credenciales de Mercado Pago
+    @Column(name = "mercadopago_access_token", length = 500)
+    private String mercadoPagoAccessToken;
+    
+    @Column(name = "mercadopago_public_key", length = 500)
+    private String mercadoPagoPublicKey;
+    
+    // Configuración de pagos
+    private Boolean paymentEnabled = false; // Si la barberia acepta pagos online
     
     // Relaciones
     @OneToMany(mappedBy = "barbershop", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -62,12 +72,34 @@ public class Barbershop {
     public Boolean getActive() { return active; }
     public void setActive(Boolean active) { this.active = active; }
 
+    // NUEVO
+    public String getMercadoPagoAccessToken() { return mercadoPagoAccessToken; }
+    public void setMercadoPagoAccessToken(String mercadoPagoAccessToken) { 
+        this.mercadoPagoAccessToken = mercadoPagoAccessToken; 
+    }
+
+    public String getMercadoPagoPublicKey() { return mercadoPagoPublicKey; }
+    public void setMercadoPagoPublicKey(String mercadoPagoPublicKey) { 
+        this.mercadoPagoPublicKey = mercadoPagoPublicKey; 
+    }
+
+    public Boolean getPaymentEnabled() { return paymentEnabled; }
+    public void setPaymentEnabled(Boolean paymentEnabled) { 
+        this.paymentEnabled = paymentEnabled; 
+    }
+
     public List<Professional> getProfessionals() { return professionals; }
-    public void setProfessionals(List<Professional> professionals) { this.professionals = professionals; }
+    public void setProfessionals(List<Professional> professionals) { 
+        this.professionals = professionals; 
+    }
 
     public List<ServiceEntity> getServices() { return services; }
-    public void setServices(List<ServiceEntity> services) { this.services = services; }
+    public void setServices(List<ServiceEntity> services) { 
+        this.services = services; 
+    }
 
     public List<Appointment> getAppointments() { return appointments; }
-    public void setAppointments(List<Appointment> appointments) { this.appointments = appointments; }
+    public void setAppointments(List<Appointment> appointments) { 
+        this.appointments = appointments; 
+    }
 }

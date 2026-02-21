@@ -24,28 +24,29 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .authorizeHttpRequests(auth -> auth
-                // ✅ Rutas públicas
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/barbershops/**").permitAll()
-                
-                // GET públicos (ver profesionales y servicios)
-                .requestMatchers("GET", "/professionals").permitAll()
-                .requestMatchers("GET", "/services").permitAll()
-                
-                // 🔒 Todo lo demás requiere autenticación
-                .anyRequest().authenticated()
-            )
-            .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-            .formLogin(form -> form.disable())
-            .httpBasic(basic -> basic.disable());
+    http
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(session -> session
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+    )
+        .authorizeHttpRequests(auth -> auth
+        // ✅ Rutas públicas
+        .requestMatchers("/auth/**").permitAll()
+        .requestMatchers("/barbershops/**").permitAll()
+        .requestMatchers("/api/payments/webhook").permitAll() // ← NUEVO
+    
+        // GET públicos
+        .requestMatchers("GET", "/professionals").permitAll()
+        .requestMatchers("GET", "/services").permitAll()
+    
+        // 🔒 Todo lo demás requiere autenticación
+        .anyRequest().authenticated()
+    )
+        .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+        .formLogin(form -> form.disable())
+        .httpBasic(basic -> basic.disable());
 
         return http.build();
     }

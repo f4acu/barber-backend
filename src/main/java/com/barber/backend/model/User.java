@@ -26,7 +26,10 @@ public class User {
 
     private boolean enabled = true;
 
-    // NUEVO: Para ADMINS, asociarlos a una peluquería
+    // Verificación de email
+    private boolean emailVerified = false;
+
+    // Para ADMINS, asociarlos a una peluquería
     // Los CLIENTES tendrán este campo en null
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "managed_barbershop_id")
@@ -90,7 +93,16 @@ public class User {
         this.enabled = enabled;
     }
 
-    // NUEVO: Getter y Setter para managedBarbershop
+    // Getter y Setter para emailVerified
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
+    }
+
+    // Getter y Setter para managedBarbershop
     public Barbershop getManagedBarbershop() {
         return managedBarbershop;
     }

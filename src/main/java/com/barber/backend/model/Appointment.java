@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
            @Index(name = "idx_appointment_professional_time", columnList = "professional_id, start_time")
        })
 public class Appointment {
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    
     @Column(nullable = false, name = "start_time")
     private LocalDateTime startTime;
     
@@ -37,13 +37,19 @@ public class Appointment {
     @JoinColumn(name = "service_id", nullable = false)
     private ServiceEntity service;
 
-    // NUEVO: Relación con Barbershop
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "barbershop_id", nullable = false)
     private Barbershop barbershop;
     
     @Column(length = 500)
     private String notes;
+
+    // Relación con Payment
+    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Payment payment;
+
+    // NUEVO: Indicador de si requiere pago
+    private Boolean requiresPayment = false;
 
     // ===== GETTERS & SETTERS =====
 
@@ -68,10 +74,15 @@ public class Appointment {
     public ServiceEntity getService() { return service; }
     public void setService(ServiceEntity service) { this.service = service; }
 
-    // NUEVO: Getter y Setter para Barbershop
     public Barbershop getBarbershop() { return barbershop; }
     public void setBarbershop(Barbershop barbershop) { this.barbershop = barbershop; }
     
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+
+    public Payment getPayment() { return payment; }
+    public void setPayment(Payment payment) { this.payment = payment; }
+
+    public Boolean getRequiresPayment() { return requiresPayment; }
+    public void setRequiresPayment(Boolean requiresPayment) { this.requiresPayment = requiresPayment; }
 }

@@ -5,14 +5,13 @@ import java.time.LocalTime;
 
 public class AppointmentRequest {
 
-    //  ID de la peluquería (OBLIGATORIO)
     private Long barbershopId;
-    
     private Long professionalId;
     private Long serviceId;
     private LocalDate date;
     private LocalTime time;
-    private String notes; //  Notas opcionales del cliente
+    private String notes;
+    private Boolean requiresPayment; // NUEVO: Si quiere pagar online
 
     // Getters & Setters
     public Long getBarbershopId() { return barbershopId; }
@@ -32,4 +31,7 @@ public class AppointmentRequest {
     
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+
+    public Boolean getRequiresPayment() { return requiresPayment; }
+    public void setRequiresPayment(Boolean requiresPayment) { this.requiresPayment = requiresPayment; }
 }

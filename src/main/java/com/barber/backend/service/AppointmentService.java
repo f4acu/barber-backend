@@ -11,6 +11,8 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @Service
 public class AppointmentService {
     
@@ -37,16 +39,21 @@ public class AppointmentService {
         this.barbershopRepository = barbershopRepository; // NUEVO
     }
 
-    // MODIFICADO: Ahora recibe userId como parámetro (viene del usuario autenticado)
+    @Transactional
     public AppointmentResponse createAppointment(AppointmentRequest request, Long userId) {
 
-        // 1. Validar que la barberia existe
+        // 1. Validar que la barbershop existe
         Barbershop barbershop = barbershopRepository.findById(request.getBarbershopId())
                 .orElseThrow(() -> new RuntimeException("Peluquería no encontrada"));
 
         // 2. Validar usuario
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+            // NUEVO: Validar que el email esté verificado
+            if (!user.isEmailVerified()) {
+                throw new RuntimeException("Debes verificar tu email antes de crear un turno");
+            }
 
         // 3. Validar que el profesional existe Y pertenece a esta barberia
         Professional professional = professionalRepository
@@ -178,11 +185,15 @@ public class AppointmentService {
         appointmentRepository.save(appointment);
     }
 
-    // Eliminar turno
+    @Transactional
     public void deleteAppointment(Long id) {
         Appointment appointment = appointmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Turno no encontrado"));
-
-        appointmentRepository.delete(appointment);
+            .orElseThrow(() -> new RuntimeException("Turno no encontrado"));
+    
+    // Solo se pueden eliminar turnos cancelados o pendientes, no completados
+        if (appointment.getStatus() == AppointmentStatus.DONE) {
+        throw new RuntimeException("No se pueden eliminar turnos completados");
+    }
+    appointmentRepository.delete(appointment);
     }
 }
