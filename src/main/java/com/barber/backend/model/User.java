@@ -21,9 +21,16 @@ public class User {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(nullable = false)
+    private Role role = Role.CLIENT;
 
     private boolean enabled = true;
+
+    // NUEVO: Para ADMINS, asociarlos a una peluquería
+    // Los CLIENTES tendrán este campo en null
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "managed_barbershop_id")
+    private Barbershop managedBarbershop; // Solo para usuarios con role = ADMIN
 
     // ===== GETTERS & SETTERS =====
 
@@ -81,5 +88,14 @@ public class User {
     
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    // NUEVO: Getter y Setter para managedBarbershop
+    public Barbershop getManagedBarbershop() {
+        return managedBarbershop;
+    }
+
+    public void setManagedBarbershop(Barbershop managedBarbershop) {
+        this.managedBarbershop = managedBarbershop;
     }
 }

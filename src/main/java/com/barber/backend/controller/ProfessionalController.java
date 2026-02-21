@@ -1,7 +1,11 @@
 package com.barber.backend.controller;
 
-import com.barber.backend.model.Professional;
-import com.barber.backend.repository.ProfessionalRepository;
+import com.barber.backend.dto.ProfessionalRequest;
+import com.barber.backend.dto.ProfessionalResponse;
+import com.barber.backend.service.ProfessionalService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,42 +15,53 @@ import java.util.List;
 @CrossOrigin
 public class ProfessionalController {
 
-    private final ProfessionalRepository professionalRepository;
+    private final ProfessionalService professionalService;
 
-    public ProfessionalController(ProfessionalRepository professionalRepository) {
-        this.professionalRepository = professionalRepository;
+    public ProfessionalController(ProfessionalService professionalService) {
+        this.professionalService = professionalService;
     }
 
+    // ✅ Obtener profesionales activos por barbershop (público)
     @GetMapping
-    public List<Professional> getAllProfessionals() {
-        return professionalRepository.findAll();
+    public ResponseEntity<List<ProfessionalResponse>> getByBarbershop(
+            @RequestParam Long barbershopId) {
+        return ResponseEntity.ok(professionalService.getProfessionalsByBarbershop(barbershopId));
     }
 
-    @GetMapping("/{id}")
-    public Professional getProfessionalById(@PathVariable Long id) {
-        return professionalRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Professional not found"));
+    // 🔒 Obtener TODOS los profesionales (incluyendo inactivos) - Solo ADMIN
+    @PreAuthorize("@barbershopSecurity.canAccessBarbershop(authentication, #barbershopId)")
+    @GetMapping("/all")
+    public ResponseEntity<List<ProfessionalResponse>> getAllByBarbershop(
+            @RequestParam Long barbershopId) {
+        return ResponseEntity.ok(professionalService.getAllProfessionalsByBarbershop(barbershopId));
     }
 
+    // 🔒 Crear profesional (solo ADMIN de esa barbershop)
+    @PreAuthorize("@barbershopSecurity.canAccessBarbershop(authentication, #request.barbershopId)")
     @PostMapping
-    public Professional createProfessional(@RequestBody Professional professional) {
-        return professionalRepository.save(professional);
+    public ResponseEntity<ProfessionalResponse> create(
+            @RequestBody ProfessionalRequest request) {
+        
+        ProfessionalResponse response = professionalService.createProfessional(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    // 🔒 Actualizar profesional (solo ADMIN de esa barbershop)
+    @PreAuthorize("@barbershopSecurity.canModifyProfessional(authentication, #id)")
     @PutMapping("/{id}")
-    public Professional updateProfessional(@PathVariable Long id, @RequestBody Professional updatedProfessional) {
-        Professional professional = professionalRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Professional not found"));
-
-        professional.setName(updatedProfessional.getName());
-        professional.setSpecialty(updatedProfessional.getSpecialty());
-        professional.setPhone(updatedProfessional.getPhone());
-
-        return professionalRepository.save(professional);
+    public ResponseEntity<ProfessionalResponse> update(
+            @PathVariable Long id,
+            @RequestBody ProfessionalRequest request) {
+        
+        ProfessionalResponse response = professionalService.updateProfessional(id, request);
+        return ResponseEntity.ok(response);
     }
 
+    // 🔒 Eliminar profesional (soft delete) - Solo ADMIN de esa barbershop
+    @PreAuthorize("@barbershopSecurity.canModifyProfessional(authentication, #id)")
     @DeleteMapping("/{id}")
-    public void deleteProfessional(@PathVariable Long id) {
-        professionalRepository.deleteById(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        professionalService.deleteProfessional(id);
+        return ResponseEntity.noContent().build();
     }
 }

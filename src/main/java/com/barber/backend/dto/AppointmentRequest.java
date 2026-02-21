@@ -5,15 +5,18 @@ import java.time.LocalTime;
 
 public class AppointmentRequest {
 
-    private Long userId;
+    //  ID de la peluquería (OBLIGATORIO)
+    private Long barbershopId;
+    
     private Long professionalId;
     private Long serviceId;
     private LocalDate date;
     private LocalTime time;
+    private String notes; //  Notas opcionales del cliente
 
     // Getters & Setters
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
+    public Long getBarbershopId() { return barbershopId; }
+    public void setBarbershopId(Long barbershopId) { this.barbershopId = barbershopId; }
 
     public Long getProfessionalId() { return professionalId; }
     public void setProfessionalId(Long professionalId) { this.professionalId = professionalId; }
@@ -26,4 +29,7 @@ public class AppointmentRequest {
 
     public LocalTime getTime() { return time; }
     public void setTime(LocalTime time) { this.time = time; }
+    
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
 }

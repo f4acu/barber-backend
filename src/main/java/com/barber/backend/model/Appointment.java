@@ -4,30 +4,46 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "appointments")
+@Table(name = "appointments",
+       indexes = {
+           @Index(name = "idx_appointment_barbershop", columnList = "barbershop_id"),
+           @Index(name = "idx_appointment_professional_time", columnList = "professional_id, start_time")
+       })
 public class Appointment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, name = "start_time")
     private LocalDateTime startTime;
+    
+    @Column(nullable = false, name = "end_time")
     private LocalDateTime endTime;
 
     @Enumerated(EnumType.STRING)
-    private AppointmentStatus status;
+    @Column(nullable = false)
+    private AppointmentStatus status = AppointmentStatus.SCHEDULED;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "professional_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "professional_id", nullable = false)
     private Professional professional;
 
-    @ManyToOne
-    @JoinColumn(name = "service_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_id", nullable = false)
     private ServiceEntity service;
+
+    // NUEVO: Relación con Barbershop
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "barbershop_id", nullable = false)
+    private Barbershop barbershop;
+    
+    @Column(length = 500)
+    private String notes;
 
     // ===== GETTERS & SETTERS =====
 
@@ -51,4 +67,11 @@ public class Appointment {
 
     public ServiceEntity getService() { return service; }
     public void setService(ServiceEntity service) { this.service = service; }
+
+    // NUEVO: Getter y Setter para Barbershop
+    public Barbershop getBarbershop() { return barbershop; }
+    public void setBarbershop(Barbershop barbershop) { this.barbershop = barbershop; }
+    
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
 }

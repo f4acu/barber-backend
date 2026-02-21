@@ -2,12 +2,14 @@ package com.barber.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableMethodSecurity // ← IMPORTANTE: Habilita @PreAuthorize
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
@@ -26,13 +28,24 @@ public class SecurityConfig {
 
         http
             .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
             .authorizeHttpRequests(auth -> auth
+                // ✅ Rutas públicas
                 .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/barbershops/**").permitAll()
+                
+                // GET públicos (ver profesionales y servicios)
+                .requestMatchers("GET", "/professionals").permitAll()
+                .requestMatchers("GET", "/services").permitAll()
+                
+                // 🔒 Todo lo demás requiere autenticación
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
             .formLogin(form -> form.disable())
-            .httpBasic(Customizer.withDefaults());
+            .httpBasic(basic -> basic.disable());
 
         return http.build();
     }

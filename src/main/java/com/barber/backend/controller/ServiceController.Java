@@ -1,7 +1,11 @@
 package com.barber.backend.controller;
 
-import com.barber.backend.model.Service;
-import com.barber.backend.repository.ServiceRepository;
+import com.barber.backend.dto.ServiceRequest;
+import com.barber.backend.dto.ServiceResponse;
+import com.barber.backend.service.ServiceService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,43 +15,45 @@ import java.util.List;
 @CrossOrigin
 public class ServiceController {
 
-    private final ServiceRepository serviceRepository;
+    private final ServiceService serviceService;
 
-    public ServiceController(ServiceRepository serviceRepository) {
-        this.serviceRepository = serviceRepository;
+    public ServiceController(ServiceService serviceService) {
+        this.serviceService = serviceService;
     }
 
+    // ✅ Obtener servicios por barbershop (público)
     @GetMapping
-    public List<Service> getAllServices() {
-        return serviceRepository.findAll();
+    public ResponseEntity<List<ServiceResponse>> getByBarbershop(
+            @RequestParam Long barbershopId) {
+        return ResponseEntity.ok(serviceService.getServicesByBarbershop(barbershopId));
     }
 
-    @GetMapping("/{id}")
-    public Service getServiceById(@PathVariable Long id) {
-        return serviceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Service not found"));
-    }
-
+    // 🔒 Crear servicio (solo ADMIN de esa barbershop)
+    @PreAuthorize("@barbershopSecurity.canAccessBarbershop(authentication, #request.barbershopId)")
     @PostMapping
-    public Service createService(@RequestBody Service service) {
-        return serviceRepository.save(service);
+    public ResponseEntity<ServiceResponse> create(
+            @RequestBody ServiceRequest request) {
+        
+        ServiceResponse response = serviceService.createService(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    // 🔒 Actualizar servicio (solo ADMIN de esa barbershop)
+    @PreAuthorize("@barbershopSecurity.canModifyService(authentication, #id)")
     @PutMapping("/{id}")
-    public Service updateService(@PathVariable Long id, @RequestBody Service updatedService) {
-        Service service = serviceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Service not found"));
-
-        service.setName(updatedService.getName());
-        service.setDescription(updatedService.getDescription());
-        service.setPrice(updatedService.getPrice());
-        service.setDuration(updatedService.getDuration());
-
-        return serviceRepository.save(service);
+    public ResponseEntity<ServiceResponse> update(
+            @PathVariable Long id,
+            @RequestBody ServiceRequest request) {
+        
+        ServiceResponse response = serviceService.updateService(id, request);
+        return ResponseEntity.ok(response);
     }
 
+    // 🔒 Eliminar servicio (solo ADMIN de esa barbershop)
+    @PreAuthorize("@barbershopSecurity.canModifyService(authentication, #id)")
     @DeleteMapping("/{id}")
-    public void deleteService(@PathVariable Long id) {
-        serviceRepository.deleteById(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        serviceService.deleteService(id);
+        return ResponseEntity.noContent().build();
     }
 }
